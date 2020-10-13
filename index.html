@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <form>
+        <label>Enter a U.S. city</label>
+        <input id="weatherInput" type="text"></input><br />
+        <input id="weatherSubmit" type="submit" value="Submit"></input>
+    </form>
+    <div id="weatherResults">
+    </div>
+
+
+    <div id="forecastResults">
+    </div>
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script>
+    const key = '3c8c5e78b9710e705f735915a95ee60f';
+
+
+
+    document.getElementById("weatherSubmit").addEventListener("click", function (event) {
+        event.preventDefault();
+        const value = document.getElementById("weatherInput").value;
+        if (value === "")
+            return;
+
+        const url = "http://api.openweathermap.org/data/2.5/weather?q=" + value + ",US&units=imperial" + "&APPID=" + key;
+        fetch(url)
+            .then(function (response) {
+                return response.json();
+            }).then(function (json) {
+                let results = "";
+                results += '<h2>Weather in ' + json.name + "</h2>";
+                for (let i = 0; i < json.weather.length; i++) {
+                    results += '<img src="http://openweathermap.org/img/w/' + json.weather[i].icon + '.png"/>';
+                }
+                results += '<h2>' + json.main.temp + " &deg;F</h2>"
+                results += "<p>"
+                for (let i = 0; i < json.weather.length; i++) {
+                    results += json.weather[i].description
+                    if (i !== json.weather.length - 1)
+                        results += ", "
+                }
+                results += "</p>";
+                document.getElementById("weatherResults").innerHTML = results;
+            });
+
+
+        const url2 = "http://api.openweathermap.org/data/2.5/forecast?q=" + value + ", US&units=imperial" + "&APPID=" + key;
+        fetch(url2)
+            .then(function (response) {
+                return response.json();
+            }).then(function (json) {
+                console.log(json)
+                let forecast = "";
+                for (let i = 0; i < json.list.length; i++) {
+                    forecast += "<div id=\"eachItem\">"
+                    forecast += "<h2>" + moment(json.list[i].dt_txt).format('MMMM Do YYYY, h:mm') + "</h2>";
+                    forecast += "<p>Temperature: " + json.list[i].main.temp + "</p>";
+                    forecast += '<img src="http://openweathermap.org/img/w/' + json.list[i].weather[0].icon + '.png"/>'
+                    forecast += "</div>"
+                }
+                document.getElementById("forecastResults").innerHTML = forecast;
+            });
+
+
+    });
+
+</script>
+
+</html>
